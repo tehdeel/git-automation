@@ -1,6 +1,6 @@
 <?php
 
-namespace Automation\Command;
+namespace Automation\Client\Command;
 
 use Coyl\Git\GitRepo;
 use chobie\Jira\Issues\Walker;
@@ -21,11 +21,11 @@ class GitBranchesCleanByJiraCommand extends ContainerAwareCommand
             ->setName('git:branches:clean-by-jira')
             ->setDescription('Deletes local branches if task is closed in Jira')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force branch deletion');
-        $this->git = new GitRepo(dirname(\Phar::running(false) ?: __DIR__));
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->git = new GitRepo(realpath('.'));
         $api = $this->getContainer()->get('git_automation.jira_api');
         $permanentBranches = ['dev', 'master', 'facebook'];
 
@@ -57,8 +57,12 @@ class GitBranchesCleanByJiraCommand extends ContainerAwareCommand
             $closedStatuses = ["approved", "awaiting for check", "closed (won't fix)", "closed success"];
             if (in_array(strtolower($issue->getStatus()['name']), $closedStatuses)) {
                 $output->writeln($issue->getKey() . ' is closed ');
-                $this->git->branchDelete($issue->getKey(), true);
-                $deleted[] = $issue->getKey();
+
+                try {
+                    $this->git->branchDelete($issue->getKey(), true);
+                    $deleted[] = $issue->getKey();
+                } catch (\Exception $e) {
+                }
             } else {
                 $output->writeln($issue->getKey() . ' is ' . $issue->getStatus()['name']);
             }

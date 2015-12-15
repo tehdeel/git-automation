@@ -17,7 +17,7 @@ class AppKernel extends Kernel
     {
         $bundles = [
             new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
-            new Automation\AutomationBundle(),
+            new Automation\Client\ClientBundle(),
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
@@ -59,6 +59,7 @@ class AppKernel extends Kernel
         $c->addDefinitions(
             ['git_automation.jira_api' => $this->createJiraApiService($parameters['parameters'])]
         );
+
     }
 
     protected function createJiraApiService($parameters)

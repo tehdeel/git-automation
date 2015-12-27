@@ -57,7 +57,6 @@ class GitBranchesCleanByJiraCommand extends ContainerAwareCommand
             $closedStatuses = ["approved", "awaiting for check", "closed (won't fix)", "closed success"];
             if (in_array(strtolower($issue->getStatus()['name']), $closedStatuses)) {
                 $output->writeln($issue->getKey() . ' is closed ');
-
                 try {
                     $this->git->branchDelete($issue->getKey(), true);
                     $deleted[] = $issue->getKey();

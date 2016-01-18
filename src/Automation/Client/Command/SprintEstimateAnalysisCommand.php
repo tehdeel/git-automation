@@ -44,15 +44,26 @@ class SprintEstimateAnalysisCommand extends ContainerAwareCommand
             }
         }
         $table = new Table($output);
-        $table->setHeaders(array('User', 'Estimate', 'Finished', 'Formula', 'Tasks'));
+        $columns = ['User', 'Estimate', 'Remaining'];
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $columns[] = 'Formula';
+            $columns[] = 'Tasks';
+        }
+        $table->setHeaders($columns);
         foreach ($times as $user => $time) {
             $estimate = array_sum($time['estimate']);
             $remaining = $estimate - array_sum($time['finished']);
-            $formula = implode(' + ', $time['estimate']);
-            if ($remaining < $estimate) {
-                $formula .= ' - ' . implode(' - ', $time['finished']);
+            $row = [$user, $estimate, $remaining];
+            if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                $formula = implode(' + ', $time['estimate']);
+                if ($remaining < $estimate) {
+                    $time['finished'] = array_filter($time['finished']);
+                    $formula .= ' - ' . implode(' - ', $time['finished']);
+                }
+                $row[] = $formula;
+                $row[] = implode(', ', array_keys($time['estimate']));
             }
-            $table->addRow([$user, $estimate, $remaining, $formula, implode(', ', array_keys($time['estimate']))]);
+            $table->addRow($row);
         }
         $table->render();
     }

@@ -33,24 +33,35 @@ class SprintEstimateAnalysisCommand extends ContainerAwareCommand
             $query .= sprintf(' AND assignee IN (%s)', implode(', ', $input->getArgument('assignees')));
         }
         $query .= ' ORDER BY originalEstimate';
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $output->writeln(sprintf('Query: "%s"', $query));
+        }
         $walker->push($query);
         $times = [];
+        $count = 0;
         /** @var \chobie\Jira\Issue $issue */
         foreach ($walker as $issue) {
-            if (!empty($issue->get('Original Estimate'))) {
-                $status = strtolower($issue->getStatus()['name']);
-                $estimate = $issue->get('Original Estimate') / 3600;
-                $times[$issue->getAssignee()['name']]['status'][$issue->getKey()] = $status;
-                $times[$issue->getAssignee()['name']]['estimate'][$issue->getKey()] = $estimate;
-                $times[$issue->getAssignee()['name']]['finished'][$issue->getKey()] = in_array($status, $this->finishedStatuses) ? $estimate : 0;
+            if (empty($issue->get('Original Estimate'))) {
+                continue;
             }
+            $count++;
+            $status = strtolower($issue->getStatus()['name']);
+            $estimate = $issue->get('Original Estimate') / 3600;
+            $times[$issue->getAssignee()['name']]['status'][$issue->getKey()] = $status;
+            $times[$issue->getAssignee()['name']]['estimate'][$issue->getKey()] = $estimate;
+            $times[$issue->getAssignee()['name']]['finished'][$issue->getKey()] = in_array($status, $this->finishedStatuses) ? $estimate : 0;
+        }
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $output->writeln(sprintf('Got %d tasks with estimates for %d users', $count, count($times)));
+        }
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+            $output->writeln(print_r($times, true));
         }
         $table = new Table($output);
         $columns = ['User', 'Estimate', 'Remaining'];
-        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $columns[] = 'Tasks';
-            $columns[] = 'Times';
-        }
+        $columns[] = 'Tasks';
+        $columns[] = 'Times';
+
 
         $table->setHeaders($columns);
 
@@ -59,14 +70,12 @@ class SprintEstimateAnalysisCommand extends ContainerAwareCommand
             $estimate = array_sum($time['estimate']);
             $remaining = $estimate - array_sum($time['finished']);
             $row = [$user, $estimate, $remaining];
-            if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                $formula = implode("\n", $time['estimate']);
-                $tasks = array_map(function ($val) use ($time) {
-                    return empty($time['status'][$val]) ? $val : $val . ' ' . $time['status'][$val];
-                }, array_keys($time['estimate']));
-                $row[] = implode("\n", $tasks);
-                $row[] = $formula;
-            }
+            $formula = implode("\n", $time['estimate']);
+            $tasks = array_map(function ($val) use ($time) {
+                return empty($time['status'][$val]) ? $val : $val . ' ' . $time['status'][$val];
+            }, array_keys($time['estimate']));
+            $row[] = implode("\n", $tasks);
+            $row[] = $formula;
             $table->addRow($row);
         }
 

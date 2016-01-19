@@ -8,6 +8,7 @@ use chobie\Jira\Api;
 use chobie\Jira\Issues\Walker;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -37,34 +38,38 @@ class SprintEstimateAnalysisCommand extends ContainerAwareCommand
         /** @var \chobie\Jira\Issue $issue */
         foreach ($walker as $issue) {
             if (!empty($issue->get('Original Estimate'))) {
-                $estimate = $issue->get('Original Estimate') / 3600;
-                $times[$issue->getAssignee()['name']]['estimate'][$issue->getKey()] = $estimate;
                 $status = strtolower($issue->getStatus()['name']);
+                $estimate = $issue->get('Original Estimate') / 3600;
+                $times[$issue->getAssignee()['name']]['status'][$issue->getKey()] = $status;
+                $times[$issue->getAssignee()['name']]['estimate'][$issue->getKey()] = $estimate;
                 $times[$issue->getAssignee()['name']]['finished'][$issue->getKey()] = in_array($status, $this->finishedStatuses) ? $estimate : 0;
             }
         }
         $table = new Table($output);
         $columns = ['User', 'Estimate', 'Remaining'];
         if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $columns[] = 'Formula';
             $columns[] = 'Tasks';
+            $columns[] = 'Times';
         }
+
         $table->setHeaders($columns);
+
         foreach ($times as $user => $time) {
+            $table->addRow(new TableSeparator());
             $estimate = array_sum($time['estimate']);
             $remaining = $estimate - array_sum($time['finished']);
             $row = [$user, $estimate, $remaining];
             if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                $formula = implode(' + ', $time['estimate']);
-                if ($remaining < $estimate) {
-                    $time['finished'] = array_filter($time['finished']);
-                    $formula .= ' - ' . implode(' - ', $time['finished']);
-                }
+                $formula = implode("\n", $time['estimate']);
+                $tasks = array_map(function ($val) use ($time) {
+                    return empty($time['status'][$val]) ? $val : $val . ' ' . $time['status'][$val];
+                }, array_keys($time['estimate']));
+                $row[] = implode("\n", $tasks);
                 $row[] = $formula;
-                $row[] = implode(', ', array_keys($time['estimate']));
             }
             $table->addRow($row);
         }
+
         $table->render();
     }
 

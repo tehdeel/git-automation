@@ -1,0 +1,27 @@
+{
+  "chmod": "0755",
+  "directories": [
+    "src",
+    "app",
+    "vendor/symfony/symfony/src/Symfony/Component/Console/Command"
+  ],
+  "files": [
+    "README.md"
+  ],
+  "main": "bin/console",
+  "output": "build/frag.phar",
+  "stub": true,
+  "finder": [
+    {
+      "exclude": [
+        "tests",
+        "test",
+        "Test",
+        "Tests",
+        ".git",
+        "Command"
+      ],
+      "in": "vendor"
+    }
+  ]
+}

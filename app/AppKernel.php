@@ -35,12 +35,12 @@ class AppKernel extends Kernel
 
     public function getCacheDir()
     {
-        return dirname(__DIR__) . '/var/cache/' . $this->getEnvironment();
+        return Phar::running() ? '/tmp/frag' : $this->getRootDir() . '/var/cache/' . $this->getEnvironment();
     }
 
     public function getLogDir()
     {
-        return dirname(__DIR__) . '/var/logs';
+        return Phar::running() ? '/tmp/frag/logs' : $this->getRootDir() . '/var/logs';
     }
 
     protected function configureRoutes(RouteCollectionBuilder $routes)

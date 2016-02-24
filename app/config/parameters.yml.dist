@@ -5,3 +5,4 @@ parameters:
     jira.host: https://jira.com
     jira.user: user
     jira.password:
+

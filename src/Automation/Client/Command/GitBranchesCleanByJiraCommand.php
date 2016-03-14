@@ -20,13 +20,23 @@ class GitBranchesCleanByJiraCommand extends ContainerAwareCommand
         $this
             ->setName('git:branches:clean-by-jira')
             ->setDescription('Deletes local branches if task is closed in Jira')
-            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force branch deletion');
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force branch deletion')
+            ->addOption('remote', 'r', InputOption::VALUE_NONE, 'Remove remote branches as well');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->git = new GitRepo(realpath('.'));
         $api = $this->getContainer()->get('git_automation.jira_api');
+        $force = $remote = false;
+        if (!empty($input->getOption('force'))) {
+            $output->writeln('Force deletion enabled');
+            $force = true;
+        }
+        if (!empty($input->getOption('remote'))) {
+            $output->writeln('Remote branches deletion enabled');
+            $remote = true;
+        }
         $permanentBranches = ['dev', 'master', 'facebook'];
 
         $branches = $this->git->branches();
@@ -40,8 +50,10 @@ class GitBranchesCleanByJiraCommand extends ContainerAwareCommand
                     }
 
                     $val = preg_replace("/_.*/i", "", $val);
-                    if (strpos($val, '-') > 1 && strpos($val, '-') < (strlen($val) - 1))
+                    if (strpos($val, '-') > 1 && strpos($val, '-') < (strlen($val) - 1)) {
                         return $val;
+                    }
+
                     return false;
                 },
                 $branches
@@ -58,7 +70,7 @@ class GitBranchesCleanByJiraCommand extends ContainerAwareCommand
             if (in_array(strtolower($issue->getStatus()['name']), $closedStatuses)) {
                 $output->writeln($issue->getKey() . ' is closed ');
                 try {
-                    $this->git->branchDelete($issue->getKey(), true);
+                    $this->git->branchDelete($issue->getKey(), $force);
                     $deleted[] = $issue->getKey();
                 } catch (\Exception $e) {
                 }
@@ -67,8 +79,9 @@ class GitBranchesCleanByJiraCommand extends ContainerAwareCommand
             }
 
         }
-        if (!empty($deleted))
+        if ($remote && !empty($deleted)) {
             $this->git->deleteRemoteBranches($deleted);
+        }
     }
 
 }

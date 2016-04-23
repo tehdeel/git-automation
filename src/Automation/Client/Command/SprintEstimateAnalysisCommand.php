@@ -99,12 +99,12 @@ class SprintEstimateAnalysisCommand extends ContainerAwareCommand
         if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
             $output->writeln(print_r($times, true));
         }
+
         $table = new Table($output);
         $columns = ['User', 'Estimate', 'Remaining', 'Tasks', 'Times'];
-
-
         $table->setHeaders($columns);
 
+        $total = [];
         foreach ($times as $user => $time) {
             $table->addRow(new TableSeparator());
             $estimate = array_sum($time['estimate']);
@@ -120,6 +120,22 @@ class SprintEstimateAnalysisCommand extends ContainerAwareCommand
             $row[] = implode("\n", $tasks);
             $row[] = $formula;
             $table->addRow($row);
+
+            $total['estimate'][] = $estimate;
+            $total['remaining'][] = $remaining;
+            $total['tasks'][] = count($tasks);
+        }
+
+        if (count($total)) {
+            $table->addRow(new TableSeparator());
+            $total = [
+                'Total',
+                array_sum($total['estimate']),
+                array_sum($total['remaining']),
+                array_sum($total['tasks']),
+                array_sum($total['estimate'])
+            ];
+            $table->addRow($total);
         }
 
         $table->render();

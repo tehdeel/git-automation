@@ -19,7 +19,9 @@
         "Test",
         "Tests",
         ".git",
-        "Command"
+        "Command",
+        "vendor/symfony/symfony/src/Symfony/Bundle/DebugBundle",
+        "vendor/sensio/generator-bundle"
       ],
       "in": "vendor"
     }

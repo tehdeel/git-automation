@@ -18,19 +18,25 @@ class GitMergingMasterCommand extends AbstractMonopolyCommand
     public function configure()
     {
         $this
-            ->setName('git:branches:merging-master')
-            ->setDescription('Merge master into release branches')
-            ->addArgument('source', InputArgument::REQUIRED, 'Source to the repository');
+            ->setName('git:branches:merging-main-branch')
+            ->setDescription('Merge main branch into release branches')
+            ->addArgument('source', InputArgument::REQUIRED, 'Source to the repository')
+            ->addArgument('release-branch-pattern', InputArgument::OPTIONAL, 'Release branch pattern', '~release/.*~')
+            ->addArgument('main-branch', InputArgument::OPTIONAL, 'Main branch', 'master')
+            ->addArgument('remote', InputArgument::OPTIONAL, 'Remote name', 'origin');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $source = trim($input->getArgument('source'));
+        $mainBranch = $input->getArgument('main-branch');
+        $mergeBranchPattern = $input->getArgument('release-branch-pattern');
+        $remote = $input->getArgument('remote');
+
         $path = vsprintf(
-            '%s/%s/%s',
+            '%s/%s',
             [
-                $this->getContainer()->getParameter('kernel.root_dir'),
-                'var/repository',
+                sys_get_temp_dir(),
                 hash('md5', $source),
             ]
         );
@@ -46,14 +52,14 @@ class GitMergingMasterCommand extends AbstractMonopolyCommand
 
         // clone repository
         $this->git = new GitRepo($path, true, false);
-        $this->git->cloneRemote(trim($input->getArgument('source')), '--branch=master');
+        $this->git->cloneRemote($source, sprintf('--branch=%s', $mainBranch));
 
         // Find release branches
         $branches = array_values(
             array_filter(
                 $this->git->branches(GitRepo::BRANCH_LIST_MODE_REMOTE),
-                function ($branch) {
-                    return preg_match('~release/.*~', $branch);
+                function ($branch) use ($mergeBranchPattern) {
+                    return preg_match($mergeBranchPattern, $branch);
                 }
             )
         );
@@ -64,16 +70,16 @@ class GitMergingMasterCommand extends AbstractMonopolyCommand
 
         $code = 0;
         foreach ($branches as $i => $branch) {
-            $branch = trim(str_replace('origin/', '', $branch));
+            $branch = trim(str_replace($remote . '/', '', $branch));
             try {
                 $output->writeln(
-                    sprintf('%d) Merging origin/master into %s', $i, $branch),
+                    sprintf('%d) Merging %s into %s', $i, $mainBranch, $branch),
                     OutputInterface::VERBOSITY_VERBOSE
                 );
 
-                $merge = $this->mergeMaster($branch);
+                $merge = $this->mergeMainBranch($remote, $mainBranch, $branch);
                 if ($merge !== 'Already up-to-date.') {
-                    $this->git->push('origin', $branch);
+                    $this->git->push($remote, $branch);
                     $output->writeln('Done', OutputInterface::VERBOSITY_VERBOSE);
                 } else {
                     $output->writeln('Skip', OutputInterface::VERBOSITY_VERBOSE);
@@ -85,23 +91,31 @@ class GitMergingMasterCommand extends AbstractMonopolyCommand
         }
 
         $fs->remove($path);
+
         return $code;
     }
 
     /**
-     * Merging master into release branch
+     * Merging main-branch into release branch
      *
+     * @param string $remote
+     * @param string $mainBranch
      * @param string $branch
      *
      * @return string
      *
      * @throws ConsoleException
      */
-    private function mergeMaster($branch)
+    private function mergeMainBranch($remote, $mainBranch, $branch)
     {
-        $this->git->branchNew(sprintf('%s origin/%s', $branch, $branch));
+        $this->git->branchNew(sprintf('%s %s/%s', $branch, $remote, $branch));
         try {
-            return trim($this->git->merge('origin/master', sprintf('Merge master into %s', $branch)));
+            return trim(
+                $this->git->merge(
+                    sprintf('%s/%s', $remote, $mainBranch),
+                    sprintf('Merge %s/%s into %s', $remote, $mainBranch, $branch)
+                )
+            );
         } catch (ConsoleException $e) {
             $this->git->mergeAbort();
             throw $e;

@@ -12,8 +12,16 @@ abstract class AbstractMonopolyCommand extends ContainerAwareCommand
 {
     public function run(InputInterface $input, OutputInterface $output)
     {
-        $path = $this->getContainer()->getParameter('kernel.root_dir') . '/var/lock';
-        $name = strtolower(str_replace(['_', '/', '\\'], '', get_class($this)));
+        $name = implode(
+            '',
+            array_map(
+                function ($e) {
+                    return strtolower(str_replace(['_', '/', '\\', '-', '.'], '', $e));
+                },
+                array_merge([get_class($this)], $input->getArguments())
+            )
+        );
+        $path = sys_get_temp_dir() . '/lock';
         $fs = new Filesystem();
         if (!$fs->exists($path)) {
             $fs->mkdir($path);

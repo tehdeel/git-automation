@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="ga.hook.pre_recieve" class="Automation\Server\Hook">
+            <argument type="collection"/>
+        </service>
+        <service id="ga.hook.conflict_markers" class="Automation\Server\HookActions\GitConflictMarkersCheck">
+            <argument id="ga.service.git_helper" type="service"/>
+            <tag name="ga.hook_action" type="pre-recieve"/>
+        </service>
+        <service id="ga.service.git_repo" class="Coyl\Git\GitRepo">
+            <argument/> <!-- current dir, replaced in extension -->
+        </service>
+        <service id="ga.service.git_helper" class="Automation\Server\GitHelper">
+            <argument type="service" id="ga.service.git_repo"/>
+        </service>
+    </services>
+</container>

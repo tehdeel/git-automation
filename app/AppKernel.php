@@ -16,6 +16,7 @@ class AppKernel extends Kernel
         $bundles = [
             new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
             new Automation\Client\ClientBundle(),
+            new Automation\Server\ServerBundle(),
             new Coyl\JiraApiRestClientBundle\JiraApiRestClientBundle(),
         ];
 

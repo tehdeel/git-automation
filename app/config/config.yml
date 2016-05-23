@@ -1,0 +1,14 @@
+imports:
+    - { resource: parameters.yml }
+
+framework:
+    translator:       { fallbacks: [ru, en] }
+    default_locale:   ru
+    secret:           huahdaisd
+
+jira_api_rest_client:
+    auth:
+        type: basic
+        username: %jira.user%
+        password: %jira.password%
+    endpoint: %jira.host%

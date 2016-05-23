@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e12243bfc25ad8e34e172b877a8b0364",
-    "content-hash": "b33a4ec26e80077988d2c782555ee98f",
+    "hash": "391390b0bd4da04f7debc47b6f56e3df",
+    "content-hash": "6dc04a90de04634fb9b5846f2a1528dc",
     "packages": [
         {
             "name": "chobie/jira-api-restclient",
@@ -103,6 +103,48 @@
             "time": "2015-12-09 22:02:10"
         },
         {
+            "name": "coyl/jira-api-rest-client-bundle",
+            "version": "dev-master",
+            "target-dir": "Coyl/JiraApiRestClientBundle",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/coyl/JiraApiRestClientBundle.git",
+                "reference": "7ac884ec6386bd8a347e06b1b93502356ffb100b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/coyl/JiraApiRestClientBundle/zipball/7ac884ec6386bd8a347e06b1b93502356ffb100b",
+                "reference": "7ac884ec6386bd8a347e06b1b93502356ffb100b",
+                "shasum": ""
+            },
+            "require": {
+                "chobie/jira-api-restclient": "~2.0",
+                "php": ">=5.5",
+                "symfony/framework-bundle": "~3.0|>=2.7.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Coyl\\JiraApiRestClientBundle": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Vasil coylOne Kulakov",
+                    "email": "iam@vasiliy.pro"
+                }
+            ],
+            "description": "Jira API REST client bundle for Symfony",
+            "time": "2016-05-20 10:19:02"
+        },
+        {
             "name": "doctrine/annotations",
             "version": "dev-master",
             "source": {
@@ -172,26 +214,26 @@
         },
         {
             "name": "doctrine/cache",
-            "version": "dev-master",
+            "version": "1.6.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/cache.git",
-                "reference": "7b35da328f17825c218b75f8c493c3c99b24774a"
+                "reference": "fe3020b50c70ced4562edc04cdf8d0857008502b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/cache/zipball/7b35da328f17825c218b75f8c493c3c99b24774a",
-                "reference": "7b35da328f17825c218b75f8c493c3c99b24774a",
+                "url": "https://api.github.com/repos/doctrine/cache/zipball/fe3020b50c70ced4562edc04cdf8d0857008502b",
+                "reference": "fe3020b50c70ced4562edc04cdf8d0857008502b",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.2"
+                "php": "~5.5|~7.0"
             },
             "conflict": {
                 "doctrine/common": ">2.2,<2.4"
             },
             "require-dev": {
-                "phpunit/phpunit": ">=3.7",
+                "phpunit/phpunit": "~4.8|~5.0",
                 "predis/predis": "~1.0",
                 "satooshi/php-coveralls": "~0.6"
             },
@@ -238,7 +280,7 @@
                 "cache",
                 "caching"
             ],
-            "time": "2015-12-09 17:17:06"
+            "time": "2016-03-11 16:30:42"
         },
         {
             "name": "doctrine/collections",
@@ -1230,7 +1272,8 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "coyl/git": 20
+        "coyl/git": 20,
+        "coyl/jira-api-rest-client-bundle": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

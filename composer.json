@@ -27,7 +27,8 @@
         "coyl/git": "dev-master",
         "symfony/symfony": "3.0.0",
         "chobie/jira-api-restclient": "2.0.*",
-        "incenteev/composer-parameter-handler": "^2.0"
+        "incenteev/composer-parameter-handler": "^2.0",
+        "coyl/jira-api-rest-client-bundle": "~0.1"
     },
     "require-dev": {
         "sensio/generator-bundle": "^3.0",

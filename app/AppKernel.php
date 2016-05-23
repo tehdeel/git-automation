@@ -11,16 +11,16 @@ use Symfony\Component\DependencyInjection\Definition;
 class AppKernel extends Kernel
 {
 
-    use MicroKernelTrait;
-
     public function registerBundles()
     {
         $bundles = [
             new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
             new Automation\Client\ClientBundle(),
+            new Automation\Server\ServerBundle(),
+            new Coyl\JiraApiRestClientBundle\JiraApiRestClientBundle(),
         ];
 
-        if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
+        if ($this->shouldLoadDevBundles()) {
             $bundles[] = new Symfony\Bundle\DebugBundle\DebugBundle();
             $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
         }
@@ -35,40 +35,27 @@ class AppKernel extends Kernel
 
     public function getCacheDir()
     {
-        return Phar::running() ? '/tmp/frag' : $this->getRootDir() . '/var/cache/' . $this->getEnvironment();
+        return $this->getRootDir() . '/../var/cache/' . $this->getEnvironment();
     }
 
     public function getLogDir()
     {
-        return Phar::running() ? '/tmp/frag/logs' : $this->getRootDir() . '/var/logs';
+        return $this->getRootDir() . '/../var/logs';
     }
 
-    protected function configureRoutes(RouteCollectionBuilder $routes)
+    /**
+     * @return bool
+     */
+    public function shouldLoadDevBundles()
     {
-        // TODO: Implement configureRoutes() method.
+        return in_array($this->getEnvironment(), ['dev', 'test'], true);
     }
 
-    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
+    /**
+     * @inheritdoc
+     */
+    public function registerContainerConfiguration(LoaderInterface $loader)
     {
-        $parser = new \Symfony\Component\Yaml\Parser();
-        $parametersFile = file_get_contents(
-            $this->getRootDir() . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'parameters.yml'
-        );
-        $parameters = $parser->parse($parametersFile);
-        $c->loadFromExtension('framework', ['secret' => 'none']);
-        $c->addDefinitions(
-            ['git_automation.jira_api' => $this->createJiraApiService($parameters['parameters'])]
-        );
-
+        $loader->load($this->getRootDir() . '/config/config.yml');
     }
-
-    protected function createJiraApiService($parameters)
-    {
-        $auth = new Definition(
-            Api\Authentication\Basic::class, [$parameters['jira.user'], $parameters['jira.password']]
-        );
-
-        return new Definition(Api::class, [$parameters['jira.host'], $auth]);
-    }
-
 }

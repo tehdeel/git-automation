@@ -26,7 +26,7 @@ class MergeSubtaskCommand extends ContainerAwareCommand
         $branches = $git->branches(GitRepo::BRANCH_LIST_MODE_All);
 
         /** @var Api $api */
-        $api = $this->getContainer()->get('git_automation.jira_api');
+        $api = $this->getContainer()->get('jira_api_rest_client');
 
         $branchName = $input->getArgument('branch');
         if (!in_array($branchName, $branches)){

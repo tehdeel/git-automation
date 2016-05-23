@@ -28,7 +28,7 @@ class TestReviewTasksCommand extends ContainerAwareCommand
         /** @var string[] $tasks */
         $tasks = $input->getArgument('tasks');
         /** @var Api $api */
-        $api = $this->getContainer()->get('git_automation.jira_api');
+        $api = $this->getContainer()->get('jira_api_rest_client');
 
         $walker = new Walker($api);
         $query = "status = 'REVIEW'";

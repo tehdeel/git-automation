@@ -69,7 +69,7 @@ class SprintEstimateAnalysisCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         /** @var Api $api */
-        $api = $this->getContainer()->get('git_automation.jira_api');
+        $api = $this->getContainer()->get('jira_api_rest_client');
         $walker = new Walker($api);
         $query = $this->getQuery($input);
         if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {

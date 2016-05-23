@@ -27,7 +27,7 @@ class GitBranchesCleanByJiraCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->git = new GitRepo(realpath('.'));
-        $api = $this->getContainer()->get('git_automation.jira_api');
+        $api = $this->getContainer()->get('jira_api_rest_client');
         $force = $remote = false;
         if (!empty($input->getOption('force'))) {
             $output->writeln('Force deletion enabled');

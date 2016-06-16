@@ -21,6 +21,7 @@ class ServerExtension extends Extension
         $loader->load('services.xml');
 
         $preRecieveActions = [];
+        $prePushActions = [];
         /** @var array $tags */
         $tags = $container->findTaggedServiceIds(self::HOOK_ACTION_TAG);
         foreach ($tags as $key => $tag) {
@@ -31,14 +32,18 @@ class ServerExtension extends Extension
                 );
             }
             switch ($tag['type']) {
-                case "pre-recieve" :
+                case 'pre-recieve':
                     $preRecieveActions[] = $container->getDefinition($key);
+                    break;
+                case 'pre-push':
+                    $prePushActions[] = $container->getDefinition($key);
                     break;
                 default:
                     throw new InvalidConfigurationException(sprintf('Action type %s not implemented', $tag['type']));
             }
         }
         $container->getDefinition('ga.hook.pre_recieve')->replaceArgument(0, $preRecieveActions);
+        $container->getDefinition('ga.hook.pre_push')->replaceArgument(0, $prePushActions);
         $container->getDefinition('ga.service.git_repo')->replaceArgument(0, realpath('.'));
     }
 }

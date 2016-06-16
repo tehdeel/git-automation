@@ -8,12 +8,12 @@ interface HookActionInterface
 {
 
     /**
-     * @param Reference $ref
-     * @param string    $oldRevision
-     * @param string    $newRevision
+     * @param string         $oldRevision
+     * @param string         $newRevision
+     * @param Reference|null $ref
      *
-     * @return ActionResult
+     * @return mixed
      */
-    public function process(Reference $ref, $oldRevision, $newRevision);
+    public function process($oldRevision, $newRevision, Reference $ref = null);
 
 }

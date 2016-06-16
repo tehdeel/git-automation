@@ -30,7 +30,8 @@ class GitHelper
 
     /**
      * @param string      $lastRevision
-     * @param null|string $firstRevision
+     * @param string|null $firstRevision
+     * @param bool        $filesOnly
      *
      * @return string
      */
@@ -48,25 +49,42 @@ class GitHelper
             $format = '--pretty=format: %s';
         }
         foreach ($log as $hash) {
-            $diff .=  $this->git->show(sprintf($format, $hash)) . "\n";
+            $diff .= $this->git->show(sprintf($format, $hash)) . "\n";
         }
 
         return $diff;
     }
 
-    public function getChangedFiles($lastRevision, $firstRevision = null, $extensions = [], $excludeDeleted = true)
+    /**
+     * @param string      $lastRevision
+     * @param string|null $firstRevision
+     * @param bool        $excludeDeleted
+     *
+     * @return array
+     */
+    public function getChangedFiles($lastRevision, $firstRevision = null, $excludeDeleted = true)
     {
         $files = $this->getDiffForAllFiles($lastRevision, $firstRevision, true);
+        $files = explode("\n", $files);
         if ($excludeDeleted) {
-            $files = array_filter($files, function ($el) {
-                return strpos($el, "D\t") !== 0;
-            });
+            $files = array_filter(
+                $files,
+                function ($el) {
+                    return strpos($el, "D\t") !== 0;
+                }
+            );
         }
-        $files = array_map(function ($el) {
-            $bits = explode("\t", $el);
-            isset($bits[1]) ? $bits[1] : $bits[0];
-        }, $files);
-        return $files;
+
+        return array_filter(
+            array_map(
+                function ($el) {
+                    $bits = explode("\t", $el);
+
+                    return isset($bits[1]) ? $bits[1] : $bits[0];
+                },
+                $files
+            )
+        );
     }
 
     public function getFileInRevision($file, $revision)

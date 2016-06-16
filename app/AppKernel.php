@@ -1,12 +1,8 @@
 <?php
 
-use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Config\Loader\LoaderInterface;
-use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
-use Symfony\Component\Routing\RouteCollectionBuilder;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use chobie\Jira\Api;
-use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\HttpKernel\Kernel;
 
 class AppKernel extends Kernel
 {

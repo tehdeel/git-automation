@@ -25,7 +25,10 @@ class GitConflictMarkersCheck implements HookActionInterface
         $this->git = $git;
     }
 
-    public function process(Reference $ref, $oldRevision, $newRevision)
+    /**
+     * @inheritdoc
+     */
+    public function process($oldRevision, $newRevision, Reference $ref = null)
     {
         $diff = $this->git->getDiffForAllFiles($newRevision, $oldRevision);
         $diff = explode("\n", $diff);

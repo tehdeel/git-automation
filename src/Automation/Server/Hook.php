@@ -28,12 +28,20 @@ class Hook
         $this->actions = $actions;
     }
 
-    public function process(Reference $ref, $oldRevision, $newRevision)
+    /**
+     * @param string         $oldRevision
+     * @param string         $newRevision
+     * @param Reference|null $ref
+     *
+     * @return HookResult
+     */
+    public function process($oldRevision, $newRevision, Reference $ref = null)
     {
         $result = new HookResult();
         foreach ($this->actions as $action) {
-            $result->addResult($action->process($ref, $oldRevision, $newRevision));
+            $result->addResult($action->process($oldRevision, $newRevision, $ref));
         }
+
         return $result;
     }
 
